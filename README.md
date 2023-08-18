@@ -6,8 +6,7 @@ A CLI tool to generate a predefined folder structure based on a provided structu
 
 - [Installation](#installation)
 - [Usage](#usage)
-  - [Flags](#flags)
-  - [Example Structure File](#example-structure-file)
+- [Example Structure File](#example-structure-file)
 
 ## Installation
 
