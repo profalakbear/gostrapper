@@ -28,7 +28,7 @@ To install the CLI tool, you'll need to have Go installed. Then, follow these st
 
 ## Usage
 
-1. To use the CLI tool, you need to provide both the -rootpath and -structure flags. Here's the basic usage:
+1. To use the CLI tool, you need to provide both the rootpath as a -r and structure as -s flags. Here's the basic usage:
 
     ```bash 
     gostrapper -p /path/to/your/project -s /path/to/structure.txt
