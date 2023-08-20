@@ -4,17 +4,50 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
-func createFolderStructure(basePath string, folders []string) error {
-	for _, folder := range folders {
-		path := filepath.Join(basePath, folder)
-		if err := os.MkdirAll(path, os.ModePerm); err != nil {
-			return err
+func createFolderStructure(basePath string, entries []string) error {
+	for _, entry := range entries {
+		path := filepath.Join(basePath, entry)
+		if path == basePath {
+			continue // Skip creating the base path itself
 		}
-		fmt.Printf("Created folder: %s\n", path)
+
+		if strings.HasSuffix(entry, "/") {
+			// Create directory
+			if err := os.MkdirAll(path, os.ModePerm); err != nil {
+				return err
+			}
+			fmt.Printf("Created folder: %s\n", path)
+		} else {
+			// Create file
+			dir := filepath.Dir(path)
+			if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+				return err
+			}
+			if _, err := os.Create(path); err != nil {
+				return err
+			}
+			fmt.Printf("Created file: %s\n", path)
+		}
+	}
+	return nil
+}
+
+func initGoMod(basePath string) error {
+	// Change working directory to base path
+	if err := os.Chdir(basePath); err != nil {
+		return err
+	}
+
+	// Run 'go mod init' command
+	cmd := exec.Command("go", "mod", "init")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("error running 'go mod init': %v\nOutput: %s", err, output)
 	}
 	return nil
 }
@@ -33,7 +66,7 @@ func main() {
 	flag.Parse()
 
 	if *p == "" || *s == "" {
-		fmt.Println("Error: You must provide both the -p and -structure flags")
+		fmt.Println("Error: You must provide both the -p and -s flags")
 		return
 	}
 
@@ -44,6 +77,12 @@ func main() {
 	}
 
 	if err := createFolderStructure(*p, structure); err != nil {
-		fmt.Println("Error:", err)
+		fmt.Println("Error creating folder structure:", err)
+		return
+	}
+
+	// Initialize go.mod and go.sum
+	if err := initGoMod(*p); err != nil {
+		fmt.Println("Error initializing go.mod:", err)
 	}
 }

@@ -1,6 +1,6 @@
 # Gostrapper CLI tool
 
-A CLI tool to generate a predefined folder structure based on a provided structure file.
+A CLI tool to generate a predefined folder structure and files inside of it based on a provided structure file for a go project(containing go.mod file).
 
 ## Table of Contents
 
@@ -38,12 +38,20 @@ To install the CLI tool, you'll need to have Go installed. Then, follow these st
 1. Create a text file named structure.txt (or any name you prefer) with the following content(you can describe your project structure as you wish) as an example:
 
     ```bash
-    cmd
-    internal/app/handler
-    internal/app/service
-    internal/app/repository
-    internal/pkg/util
-    web/static
-    web/templates
-    config
-    migrations
+    cmd/app/main.go
+    database/migrations/
+    database/database.go
+    profiles/default.env
+    internal/config/builder.go
+    internal/server/server.go
+    internal/server/handler/handler.go
+    internal/server/middleware/
+    internal/server/router/router.go
+    internal/server/dto/
+    internal/service/service.go
+    internal/utils/
+    .gitignore
+    .gitlab-ci.yml
+    Dockerfile
+    Makefile
+    README.md
