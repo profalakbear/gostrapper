@@ -5,6 +5,7 @@ A CLI tool to generate a predefined folder structure and files inside of it base
 ## Table of Contents
 
 - [Installation](#installation)
+- [Flags](#flags)
 - [Usage](#usage)
 - [Example Structure File](#example-structure-file)
 
@@ -25,6 +26,12 @@ To install the CLI tool, you'll need to have Go installed. Then, follow these st
 
     ```bash
     sudo mv gostrapper /usr/local/bin
+    
+## Flags 
+
+1. -p  Absoulute path of the target location of the project that you want to create in. Example -p ./project
+2. -s  Absolute path of the structe.txt file. Example -s ./structure.txt 
+3. -m  Go Module path. This flag is optional while you create your project inside the go workspace. But if you are willing to create you project outsite of the go workspace, you should provide this option too. Example -m project/gomodule/path(ATTENTION TO THIS FLAG).
 
 ## Usage
 
