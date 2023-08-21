@@ -37,14 +37,21 @@ func createFolderStructure(basePath string, entries []string) error {
 	return nil
 }
 
-func initGoMod(basePath string) error {
+func initGoMod(basePath, modulePath string) error {
 	// Change working directory to base path
 	if err := os.Chdir(basePath); err != nil {
 		return err
 	}
 
-	// Run 'go mod init' command
-	cmd := exec.Command("go", "mod", "init")
+	var cmd *exec.Cmd
+	if modulePath != "" {
+		// Run 'go mod init' command with the provided module path
+		cmd = exec.Command("go", "mod", "init", modulePath)
+	} else {
+		// Run 'go mod init' command without specifying module path
+		cmd = exec.Command("go", "mod", "init")
+	}
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("error running 'go mod init': %v\nOutput: %s", err, output)
@@ -79,8 +86,15 @@ func writePackageDeclaration(filePath string, packageName string) error {
 	return nil
 }
 
-func readStructureFromFile(filename string) ([]string, error) {
-	content, err := os.ReadFile(filename)
+func cleanupOnError(basePath string) {
+	fmt.Println("Cleaning up...")
+	if err := os.RemoveAll(basePath); err != nil {
+		fmt.Println("Error cleaning up:", err)
+	}
+}
+
+func readStructureFromFile(filePath string) ([]string, error) {
+	content, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +104,7 @@ func readStructureFromFile(filename string) ([]string, error) {
 func main() {
 	p := flag.String("p", "", "Root path for creating the folder structure")
 	s := flag.String("s", "", "File containing the folder structure")
+	m := flag.String("m", "", "Optional go mod module path")
 	flag.Parse()
 
 	if *p == "" || *s == "" {
@@ -97,30 +112,45 @@ func main() {
 		return
 	}
 
-	structure, err := readStructureFromFile(*s)
+	absFilePath, err := filepath.Abs(*p)
+	if err != nil {
+		return
+	}
+
+	absStructurePath, err := filepath.Abs(*s)
+	if err != nil {
+		return
+	}
+
+	fmt.Println("Absolute target path", absFilePath)
+	fmt.Println("Absolute structure file path", absStructurePath)
+
+	structure, err := readStructureFromFile(absStructurePath)
 	if err != nil {
 		fmt.Println("Error reading structure file:", err)
 		return
 	}
 
-	if err := createFolderStructure(*p, structure); err != nil {
+	if err := createFolderStructure(absFilePath, structure); err != nil {
 		fmt.Println("Error creating folder structure:", err)
+		cleanupOnError(absFilePath)
 		return
 	}
 
 	// Initialize go.mod and go.sum
-	if err := initGoMod(*p); err != nil {
+	if err := initGoMod(absFilePath, *m); err != nil {
 		fmt.Println("Error initializing go.mod:", err)
+		cleanupOnError(absFilePath)
 		return
 	}
 
 	// Write package declarations for .go files
-	err = filepath.Walk(*p, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(absFilePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if strings.HasSuffix(path, ".go") {
-			relPath, err := filepath.Rel(*p, path)
+			relPath, err := filepath.Rel(absFilePath, path)
 			if err != nil {
 				return err
 			}
@@ -141,5 +171,7 @@ func main() {
 	})
 	if err != nil {
 		fmt.Println("Error writing package declarations:", err)
+		cleanupOnError(absFilePath)
+		return
 	}
 }
