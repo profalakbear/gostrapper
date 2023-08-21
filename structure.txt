@@ -1,9 +1,0 @@
-cmd
-internal/app/handler
-internal/app/service
-internal/app/repository
-internal/pkg/util
-web/static
-web/templates
-config
-migrations
