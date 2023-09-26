@@ -35,7 +35,7 @@ To install the CLI tool, you'll need to have Go installed. Then, follow these st
    ```bash
    -p ./project
    
-3. -s  Absolute path of the structe.txt file.
+3. -s  Absolute path of the structe.txt file. This flag is optional flag. In case of omitting this flag you should set "GOSTRAP_STRUCT" variable to the environment.
 
    Example:
    ```bash
@@ -49,10 +49,15 @@ To install the CLI tool, you'll need to have Go installed. Then, follow these st
 
 ## Usage
 
-1. To use the CLI tool, you need to provide both the rootpath as a -r and structure as -s flags but the -m is optional if you are using this tool inside go workspace. Here's the basic usage:
+1. To use the CLI tool, you need to provide both the rootpath as a -p but the -m and -s flags are optional if you are using this tool inside go workspace. Here's the basic usage:
 
     ```bash 
     gostrapper -p /path/to/your/project -s /path/to/structure.txt -m project/gomodule/path
+
+or (without -s flag)
+
+    export GOSTRAP_STRUCT=/path/to/structure.txt
+    gostrapper -p /path/to/your/project -m project/gomodule/path
 
 ## Example Structure File
 

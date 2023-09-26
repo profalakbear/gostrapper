@@ -101,14 +101,30 @@ func readStructureFromFile(filePath string) ([]string, error) {
 	return strings.Split(string(content), "\n"), nil
 }
 
+func getStructurePathFromFlagOrEnv() (string, error) {
+	// Check if the -s flag is provided
+	sFlag := flag.String("s", "", "File containing the folder structure")
+	flag.Parse()
+	if *sFlag != "" {
+		return *sFlag, nil
+	}
+
+	// If -s flag is not provided, check the GOSTRAP_STRUCT environment variable
+	structureEnv := os.Getenv("GOSTRAP_STRUCT")
+	if structureEnv != "" {
+		return structureEnv, nil
+	}
+
+	return "", fmt.Errorf("structure file not provided (-s flag or GOSTRAP_STRUCT environment variable)")
+}
+
 func main() {
 	p := flag.String("p", "", "Root path for creating the folder structure")
-	s := flag.String("s", "", "File containing the folder structure")
 	m := flag.String("m", "", "Optional go mod module path")
 	flag.Parse()
 
-	if *p == "" || *s == "" {
-		fmt.Println("Error: You must provide both the -p and -s flags")
+	if *p == "" {
+		fmt.Println("Error: You must provide -p flag")
 		return
 	}
 
@@ -117,7 +133,14 @@ func main() {
 		return
 	}
 
-	absStructurePath, err := filepath.Abs(*s)
+	// Get the structure file path from flag or environment variable
+	structurePath, err := getStructurePathFromFlagOrEnv()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	absStructurePath, err := filepath.Abs(structurePath)
 	if err != nil {
 		return
 	}
